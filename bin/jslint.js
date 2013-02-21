@@ -60,7 +60,10 @@ var maybeExit = (function () {
 
         if (filesLeft === 0) {
             // This was the last file.
-            process.exit(ok ? 0 : 1);
+            // Wait 50ms before exiting so the buffer is properly flushed on XP
+            setTimeout(function () {
+                process.exit(ok ? 0 : 1);
+            }, 50);
         }
     };
 }());
@@ -79,6 +82,8 @@ function lintFile(file) {
         }
 
         data = data.toString("utf8");
+        // Trim lines containing only whitespace (Brackets does this, too)
+        data = data.replace(/(\r?\n)[ \t]+(?=\r?\n|$)/g, "$1");
         var lint = linter.lint(data, parsed);
 
         if (parsed.json) {
